@@ -20,11 +20,14 @@ namespace GreenPass
      */
     public class ValidationService
     {
-        public ValidationService()
+        private readonly CertificateManager _certManager;
+
+        public ValidationService(CertificateManager certificateManager)
         {
+            _certManager = certificateManager;
         }
 
-        public SignedDGC VerifyData(String codeData, CertificateManager certificateManager)
+        public SignedDGC Validate(String codeData)
         {
             try {
                 // The base45 encoded data shoudl begin with HC1
@@ -40,7 +43,7 @@ namespace GreenPass
 
                     SignedDGC vacProof = new SignedDGC();
                     // Sign and encrypt data
-                    byte[] signedData = VerifySignedData(uncompressedData, vacProof, certificateManager);
+                    byte[] signedData = VerifySignedData(uncompressedData, vacProof, _certManager);
 
                     // Get json from CBOR representation of ProofCode
                     EU_DGC eU_DGC = GetVaccinationProofFromCbor(signedData);
