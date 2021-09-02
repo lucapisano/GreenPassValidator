@@ -1,0 +1,123 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DSC-TL format JSON Schema",
+  "description": "Schema defining the payload format for Document Signing Certificate - Trust List information",
+  "type": "object",
+  "required": [
+    "iss",
+    "iat",
+    "exp",
+    "dsc_trust_list"
+  ],
+  "properties": {
+    "id": {
+      "description": "Identifier of DSC-TL",
+      "type": "string"
+    },
+    "iss": {
+      "description": "Identifier of the issuer of the DSC-TL",
+      "type": "string"
+    },
+    "iat": {
+      "description": "Issued at time (seconds since epoch)",
+      "type": "integer"
+    },
+    "exp": {
+      "description": "Expiration time (seconds since epoch)",
+      "type": "integer"
+    },
+    "aud": {
+      "description": "Optional array of identifiers of the audiences",
+      "type": "array",
+      "items": {
+        "description": "Identifier of an audience of this trust list",
+        "type": "string"
+      }
+    },
+    "dsc_trust_list": {
+      "description": "List of trusted DSC for each country where the country code (ISO 3166-1 alpha-2) is the key",
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z]{2}$": {
+          "$ref":"#/$defs/dsc_trust"
+        }
+      }
+    }
+  },
+  "$defs" : {
+    "dsc_trust" : {
+      "description": "Holds keys in the form of JWK Set and registered  EKU constraints for each registered DCS",
+      "type": "object",
+      "properties": {
+        "eku": {
+          "description": "Map of Extended Key Usage OID:s mapped by key ID (kid)",
+          "type": "object",
+          "properties": {
+            "patternProperties": {
+              "^S{12}$": {
+                "description": "Extended Key Usage OID as String",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "keys": {
+          "description": "JWK SET for all DSC for the specified country",
+          "type": "array",
+          "items": {
+            "$ref":"#/$defs/key"
+          }
+        }
+      }
+    },
+    "key" : {
+      "description": "JWK SET for all DSC for the specified country",
+      "type": "object",
+      "properties": {
+        "crv": {
+          "description": "",
+          "type": "string"
+        },
+        "kid": {
+          "description": "",
+          "type": "string"
+        },
+        "kty": {
+          "description": "",
+          "type": "string"
+        },
+        "x": {
+          "description": "",
+          "type": "string"
+        },
+        "x5c": {
+          "description": "",
+          "type": "array",
+          "items": {
+            "description": "",
+            "type": "object"
+          }
+        },
+        "x5t#S256": {
+          "description": "",
+          "type": "string"
+        },
+        "y": {
+          "description": "",
+          "type": "string"
+        },
+        "n": {
+          "description": "",
+          "type": "string"
+        },
+        "e": {
+          "description": "",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
