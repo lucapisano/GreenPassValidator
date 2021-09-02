@@ -5,6 +5,7 @@ This package enables Green Pass QR code reading and reading
 
 ## Features
 
+- .NET Standard 2.1 runs on any platform. Docker, Windows, Linux, MacOS, Android, iOS, Smartwatches, Raspberry, Embedded Controllers, ecc
 - Decode QR Code string into readable JSON
 - Verify GreenPass using official Trust List servers
 - Validation certificates caching for configurable TimeSpan to improve performance (default is 24h)
