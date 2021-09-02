@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GreenPassValidator\GreenPassValidator.csproj" />
+    <ProjectReference Include="..\GreenPass\GreenPass.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,7 +9,7 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using PeterO.Cbor;
 
-namespace DGCValidator.Services
+namespace GreenPass
 {
     /**
      * A Crypto support class for the reading of the European Digital Green Certificate.
@@ -18,9 +18,9 @@ namespace DGCValidator.Services
      * @author Martin Lindström (martin@idsec.se)
      * @author Henric Norlander (extern.henric.norlander@digg.se)
      */
-    public class VerificationService
+    public class ValidationService
     {
-        public VerificationService()
+        public ValidationService()
         {
         }
 

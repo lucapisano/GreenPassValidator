@@ -1,5 +1,5 @@
 using DGCValidator.Services;
-using GreenPassValidator.Extensions;
+using GreenPass.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPassValidator", "GreenPassValidator\GreenPassValidator.csproj", "{8948FD6E-D54A-42FA-9C16-C8B0057D55E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPass", "GreenPass\GreenPass.csproj", "{8948FD6E-D54A-42FA-9C16-C8B0057D55E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPassValidator.Test", "GreenPassValidator.Test\GreenPassValidator.Test.csproj", "{2FF2577C-F024-42C3-B3AA-F96308C45E3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPass.Test", "GreenPass.Test\GreenPass.Test.csproj", "{2FF2577C-F024-42C3-B3AA-F96308C45E3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{79C00903-89E0-4FE9-9CE8-E57FC74F8FF2}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

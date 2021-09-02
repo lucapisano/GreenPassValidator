@@ -1,12 +1,12 @@
 ﻿using DGCValidator.Services;
-using GreenPassValidator.Options;
+using GreenPass.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GreenPassValidator.Extensions
+namespace GreenPass.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -16,7 +16,7 @@ namespace GreenPassValidator.Extensions
                 .Configure<ValidatorOptions>(config.GetSection(nameof(ValidatorOptions)))
                 ;
             sc
-                .AddTransient<VerificationService>()
+                .AddTransient<ValidationService>()
                 .AddTransient<CertificateManager>()
                 .AddTransient<IRestService, RestService>()
 

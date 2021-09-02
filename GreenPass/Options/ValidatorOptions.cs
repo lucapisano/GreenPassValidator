@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GreenPassValidator.Options
+namespace GreenPass.Options
 {
     public class ValidatorOptions
     {

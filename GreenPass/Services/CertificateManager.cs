@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using DGCValidator.Services.CWT.Certificates;
 using DGCValidator.Services.DGC.ValueSet;
-using GreenPassValidator.Options;
+using GreenPass.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Asn1.X9;

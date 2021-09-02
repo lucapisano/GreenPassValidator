@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using DGCValidator.Services.CWT;
 using DGCValidator.Services.CWT.Certificates;
 using DGCValidator.Services.DGC.ValueSet;
-using GreenPassValidator.Options;
+using GreenPass.Options;
 using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;

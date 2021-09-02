@@ -5,7 +5,13 @@
 	  <Authors>Luca Pisano</Authors>
 	  <Version>0.1</Version>
 	  <IsPackable>true</IsPackable>
-	  <Description>This package enables Green Pass QR code verification and reading</Description>
+	  <Title>Green Pass</Title>
+	  <Description>This package enables reading and validating the European Digital Green Certificate also known as Green Pass</Description>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageId>GreenPass</PackageId>
+	  <RepositoryUrl>https://github.com/lucapisano/GreenPassValidator</RepositoryUrl>
+	  <PackageTags>covid19, qrcode</PackageTags>
+	  <Copyright>Luca Pisano @ 2021</Copyright>
   </PropertyGroup>
 
 	<ItemGroup>
