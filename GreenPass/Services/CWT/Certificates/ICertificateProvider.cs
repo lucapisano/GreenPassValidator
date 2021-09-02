@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto;
 
 namespace DGCValidator.Services.CWT.Certificates
@@ -32,7 +33,7 @@ namespace DGCValidator.Services.CWT.Certificates
          *          the key identifier
          * @return a list of certificates (never null)
          */
-        List<AsymmetricKeyParameter> GetCertificates(String country, byte[] kid);
+        Task<List<AsymmetricKeyParameter>> GetCertificates(String country, byte[] kid);
 
     }
 }

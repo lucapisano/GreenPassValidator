@@ -8,6 +8,7 @@ using DGCValidator.Services.DGC.V1;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using PeterO.Cbor;
+using System.Threading.Tasks;
 
 namespace GreenPass
 {
@@ -27,7 +28,7 @@ namespace GreenPass
             _certManager = certificateManager;
         }
 
-        public SignedDGC Validate(String codeData)
+        public async Task<SignedDGC> Validate(String codeData)
         {
             try {
                 // The base45 encoded data shoudl begin with HC1
@@ -43,7 +44,7 @@ namespace GreenPass
 
                     SignedDGC vacProof = new SignedDGC();
                     // Sign and encrypt data
-                    byte[] signedData = VerifySignedData(uncompressedData, vacProof, _certManager);
+                    byte[] signedData = await VerifySignedData(uncompressedData, vacProof, _certManager);
 
                     // Get json from CBOR representation of ProofCode
                     EU_DGC eU_DGC = GetVaccinationProofFromCbor(signedData);
@@ -79,10 +80,10 @@ namespace GreenPass
             }
         }
 
-		protected static byte[] VerifySignedData(byte[] signedData, SignedDGC vacProof, CertificateManager certificateManager)
+		protected static async Task<byte[]> VerifySignedData(byte[] signedData, SignedDGC vacProof, CertificateManager certificateManager)
         {
             DGCVerifier verifier = new DGCVerifier(certificateManager);
-            return verifier.Verify(signedData, vacProof);
+            return await verifier.VerifyAsync(signedData, vacProof);
         }
 
         protected static byte[] Base45Decoding(byte[] encodedData)

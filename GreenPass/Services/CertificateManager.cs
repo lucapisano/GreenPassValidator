@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using DGCValidator.Services.CWT.Certificates;
 using DGCValidator.Services.DGC.ValueSet;
 using GreenPass.Options;
@@ -37,7 +38,7 @@ namespace DGCValidator.Services
             _opt = _sp.GetRequiredService<IOptions<ValidatorOptions>>();
             _restService = service;
         }
-        public async void RefreshTrustListAsync()
+        public async Task RefreshTrustListAsync()
         {
             DSC_TL trustList = await _restService.RefreshTrustListAsync();
             if (trustList != null && trustList.DscTrustList != null && trustList.DscTrustList.Count > 0 && trustList.Exp > GetSecondsFromEpoc())
@@ -47,7 +48,7 @@ namespace DGCValidator.Services
             }
         }
 
-        public void LoadCertificates()
+        public async Task LoadCertificates()
         {
             if (TrustList == null && File.Exists(_opt.Value.CacheTrustListFileName))
             {
@@ -61,7 +62,7 @@ namespace DGCValidator.Services
             // If trustlist is not set or it´s older than 24 hours refresh it
             if (TrustList == null || (TrustList.Iat + _opt.Value.CacheInterval.TotalSeconds) < GetSecondsFromEpoc())
             {
-                RefreshTrustListAsync();
+                await RefreshTrustListAsync();
             }
         }
 
@@ -70,9 +71,9 @@ namespace DGCValidator.Services
             return DateTimeOffset.Now.ToUnixTimeSeconds();
         }
 
-        public List<AsymmetricKeyParameter> GetCertificates(string country, byte[] kid)
+        public async Task<List<AsymmetricKeyParameter>> GetCertificates(string country, byte[] kid)
         {
-            LoadCertificates();
+            await LoadCertificates();
             List<AsymmetricKeyParameter> publicKeys = new List<AsymmetricKeyParameter>();
 
             // No TrustList means no keys to match with

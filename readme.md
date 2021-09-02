@@ -7,6 +7,7 @@ This package enables Green Pass QR code reading and reading
 
 - Decode QR Code string into readable JSON
 - Verify GreenPass using official Trust List servers
+- Validation certificates caching for configurable TimeSpan to improve performance (default is 24h)
 - Support for custom Trust List servers is provided using appsettings.json
 
 ```csharp

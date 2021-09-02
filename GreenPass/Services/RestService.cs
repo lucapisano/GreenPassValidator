@@ -28,7 +28,7 @@ namespace DGCValidator.Services
             client = new HttpClient();
         }
 
-        public Task<DSC_TL> RefreshTrustListAsync()
+        public async Task<DSC_TL> RefreshTrustListAsync()
         {
             DSC_TL trustList = new DSC_TL();
             Uri uri = new Uri(_opt.Value.CertificateListProviderUrl);
@@ -51,7 +51,7 @@ namespace DGCValidator.Services
                 throw new Exception($"error in retrieving Trust List from url {_opt.Value.CertificateListProviderUrl}", ex);
             }
 
-            return Task.FromResult(trustList);
+            return trustList;
         }
 
         private byte[] Verify(string content)

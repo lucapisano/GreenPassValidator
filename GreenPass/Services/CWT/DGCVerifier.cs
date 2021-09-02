@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DGCValidator.Services.CWT.Certificates;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.X509;
@@ -31,7 +32,7 @@ namespace DGCValidator.Services.CWT
          * @throws CertificateExpiredException
          *           if the DGC has expired
          */
-        public byte[] Verify(byte[] signedDGC, SignedDGC vacProof)
+        public async Task<byte[]> VerifyAsync(byte[] signedDGC, SignedDGC vacProof)
         {
             CoseSign1_Object obj = CoseSign1_Object.Decode(signedDGC);
 
@@ -45,7 +46,7 @@ namespace DGCValidator.Services.CWT
                 throw new Exception("Signed DCC does not contain kid or country - cannot find certificate");
             }
 
-            List<AsymmetricKeyParameter> certs = certificateProvider.GetCertificates(country, kid);
+            List<AsymmetricKeyParameter> certs = await certificateProvider.GetCertificates(country, kid);
 
             foreach (AsymmetricKeyParameter cert in certs)
             {
