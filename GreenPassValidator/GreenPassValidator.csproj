@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+	  <Authors>Luca Pisano</Authors>
+	  <Version>0.1</Version>
+	  <IsPackable>true</IsPackable>
+	  <Description>This package enables Green Pass QR code verification and reading</Description>
   </PropertyGroup>
 
 	<ItemGroup>
