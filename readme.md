@@ -2,7 +2,7 @@
 ## By [Luca Pisano](https://lucapisano.it)
 
 This package enables Green Pass QR code reading and reading
-
+NuGet available at [NuGet.Org/packages/GreenPass](https://www.nuget.org/packages/GreenPass)
 ## Features
 
 - .NET Standard 2.1 runs on any platform. Docker, Windows, Linux, MacOS, Android, iOS, Smartwatches, Raspberry, Embedded Controllers, ecc
