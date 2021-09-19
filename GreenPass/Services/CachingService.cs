@@ -23,15 +23,21 @@ namespace GreenPass.Services
             _opt = _sp.GetRequiredService<IOptions<ValidatorOptions>>();
         }
 
+        DateTime lastRulesSync { get; set; }
         List<RemoteRule> rules { get; set; } = new List<RemoteRule>();
         public async Task<List<RemoteRule>> GetRules()
         {
+            if (rules?.Any()??false && (DateTime.Now - lastRulesSync) < TimeSpan.FromDays(1))
+                return rules;
             if (!rules?.Any() ?? false)
             {
                 var req = new RestRequest(_opt.Value.RulesProviderUrl);
                 var res = new RestClient().Get(req);
                 if (res.IsSuccessful)
+                {
                     rules = JsonConvert.DeserializeObject<List<RemoteRule>>(res.Content);
+                    lastRulesSync = DateTime.Now;
+                }
             }
             return rules;
         }
