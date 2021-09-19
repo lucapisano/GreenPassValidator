@@ -1,5 +1,6 @@
 ﻿using DGCValidator.Services;
 using GreenPass.Options;
+using GreenPass.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -19,7 +20,7 @@ namespace GreenPass.Extensions
                 .AddTransient<ValidationService>()
                 .AddTransient<CertificateManager>()
                 .AddTransient<IRestService, RestService>()
-
+                .AddSingleton<CachingService>()
                 ;
             return sc;
         }

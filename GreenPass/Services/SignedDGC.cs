@@ -15,9 +15,9 @@ namespace DGCValidator.Services
     {
         public EU_DGC Dgc { get; set; }
         public string IssuingCountry { get; set; }
-        public DateTime ExpirationDate { get; set; }
+        public DateTime CertificateExpirationDate { get; set; }
         public DateTime IssuedDate { get; set; }
-
+        public bool IsInvalid { get; set; }
         public SignedDGC()
         {
         }

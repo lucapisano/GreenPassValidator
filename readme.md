@@ -21,7 +21,11 @@ public void ConfigureServices(IServiceCollection services)
             ;            
         }
 ```
-
+```csharp
+var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult);
+if(res.IsInvalid)
+/*certificate is invalid, either expired or not yet valid*/
+```
 This is an example of how you can configure it
 ```json
 {
@@ -30,6 +34,7 @@ This is an example of how you can configure it
     }
 }
 ```
+Actual rules verification is implemented for Italian DGC server format available at https://get.dgc.gov.it/v1/dgc/settings
 Special thanks to the authors of DGCValidator https://github.com/ehn-dcc-development/DGCValidator
 
 Any artifact present in this repository, code included, is made under pure personal terms and is not related to my job.

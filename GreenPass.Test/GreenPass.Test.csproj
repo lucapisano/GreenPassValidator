@@ -19,4 +19,10 @@
     <ProjectReference Include="..\GreenPass\GreenPass.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="belgium.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

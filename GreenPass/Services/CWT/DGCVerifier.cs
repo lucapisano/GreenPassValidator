@@ -70,7 +70,7 @@ namespace DGCValidator.Services.CWT
                 DateTime? expiration = cwt.GetExpiration();
                 if (expiration.HasValue)
                 {
-                    vacProof.ExpirationDate = expiration.Value;
+                    vacProof.CertificateExpirationDate = expiration.Value;
                     if (DateTime.UtcNow.CompareTo(expiration) >= 0)
                     {
                         throw new CertificateExpiredException(string.Format("DCC has expired {0}",expiration.Value));

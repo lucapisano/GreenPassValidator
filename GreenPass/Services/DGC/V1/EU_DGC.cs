@@ -30,19 +30,19 @@ namespace DGCValidator.Services.DGC.V1
         /// Recovery Group
         /// </summary>
         [JsonProperty("r", NullValueHandling = NullValueHandling.Ignore)]
-        public RElement[] R { get; set; }
+        public RecoveryElement[] Recoveries { get; set; }
 
         /// <summary>
         /// Test Group
         /// </summary>
         [JsonProperty("t", NullValueHandling = NullValueHandling.Ignore)]
-        public TElement[] T { get; set; }
+        public TestElement[] Tests { get; set; }
 
         /// <summary>
         /// Vaccination Group
         /// </summary>
         [JsonProperty("v", NullValueHandling = NullValueHandling.Ignore)]
-        public VElement[] V { get; set; }
+        public VaccinationElement[] Vaccinations { get; set; }
 
         /// <summary>
         /// Version of the schema, according to Semantic versioning (ISO, https://semver.org/ version
@@ -87,7 +87,7 @@ namespace DGCValidator.Services.DGC.V1
     /// <summary>
     /// Recovery Entry
     /// </summary>
-    public partial class RElement
+    public partial class RecoveryElement
     {
         /// <summary>
         /// Unique Certificate Identifier, UVCI
@@ -132,7 +132,7 @@ namespace DGCValidator.Services.DGC.V1
     /// <summary>
     /// Test Entry
     /// </summary>
-    public partial class TElement
+    public partial class TestElement
     {
         /// <summary>
         /// Unique Certificate Identifier, UVCI
@@ -162,19 +162,19 @@ namespace DGCValidator.Services.DGC.V1
         /// RAT Test name and manufacturer
         /// </summary>
         [JsonProperty("ma", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Ma { get; set; }
+        public string? Manufacturer { get; set; }
 
         /// <summary>
         /// NAA Test Name
         /// </summary>
         [JsonProperty("nm", NullValueHandling = NullValueHandling.Ignore)]
-        public string Nm { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Date/Time of Sample Collection
         /// </summary>
         [JsonProperty("sc")]
-        public DateTimeOffset Sc { get; set; }
+        public DateTimeOffset SampleCollectionDate { get; set; }
 
         /// <summary>
         /// Testing Centre
@@ -189,67 +189,67 @@ namespace DGCValidator.Services.DGC.V1
         /// Test Result
         /// </summary>
         [JsonProperty("tr")]
-        public string Tr { get; set; }
+        public string Result { get; set; }
 
         /// <summary>
         /// Type of Test
         /// </summary>
         [JsonProperty("tt")]
-        public string Tt { get; set; }
+        public string TestType { get; set; }
     }
 
     /// <summary>
     /// Vaccination Entry
     /// </summary>
-    public partial class VElement
+    public partial class VaccinationElement
     {
         /// <summary>
         /// Unique Certificate Identifier: UVCI
         /// </summary>
         [JsonProperty("ci")]
-        public string Ci { get; set; }
+        public string CertificateId { get; set; }
 
         /// <summary>
         /// Country of Vaccination
         /// </summary>
         [JsonProperty("co")]
-        public string Co { get; set; }
+        public string Country { get; set; }
 
         /// <summary>
         /// Dose Number
         /// </summary>
         [JsonProperty("dn")]
-        public long Dn { get; set; }
+        public long DoseNumber { get; set; }
 
         /// <summary>
         /// Date of Vaccination
         /// </summary>
         [JsonProperty("dt")]
-        public DateTimeOffset Dt { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         /// <summary>
         /// Certificate Issuer
         /// </summary>
         [JsonProperty("is")]
-        public string Is { get; set; }
+        public string Issuer { get; set; }
 
         /// <summary>
         /// Marketing Authorization Holder - if no MAH present, then manufacturer
         /// </summary>
         [JsonProperty("ma")]
-        public string Ma { get; set; }
+        public string Manufacturer { get; set; }
 
         /// <summary>
         /// vaccine medicinal product
         /// </summary>
         [JsonProperty("mp")]
-        public string Mp { get; set; }
+        public string MedicinalProduct { get; set; }
 
         /// <summary>
         /// Total Series of Doses
         /// </summary>
         [JsonProperty("sd")]
-        public long Sd { get; set; }
+        public long SeriesOfDoses { get; set; }
 
         /// <summary>
         /// disease or agent targeted
