@@ -140,7 +140,7 @@ namespace GreenPass
                 var date = dgc.Recoveries?.OrderByDescending(x => x.Du).FirstOrDefault()?.Du.DateTime;
                 if (date == default)
                     return default;
-                return date > GetActualDate();
+                return GetActualDate()>date;
             }
             catch (Exception e) { 
                 return default; 
