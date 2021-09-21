@@ -89,7 +89,17 @@ namespace GreenPass
                 var last = dgc.Tests?.OrderByDescending(x => x.SampleCollectionDate).FirstOrDefault();
                 if (last == default)
                     return default;
-                var applicableRules = rules.Where(x => x.Name.Contains("_test_")); //TODO: unknown distinction between TestTypes
+                const string RapidType = "LP217198-3";
+                const string MolecularType = "LP6464-4";
+                string testTypeName = default;
+                if (last.TestType == MolecularType)
+                    testTypeName = "molecular";
+                else if (last.TestType == RapidType)
+                    testTypeName = "rapid";
+                Func<RemoteRule, bool> predicate = x => x.Name.Contains("_test_");
+                if(testTypeName!=default)
+                    predicate= x => x.Name.Contains(testTypeName) && x.Name.Contains("_test_");
+                var applicableRules = rules.Where(predicate);
                 int hoursStart = 0;
                 int.TryParse(applicableRules.FirstOrDefault(x=>x.Name.Contains("start"))?.Value, out hoursStart);
                 if (GetActualDate() < last.SampleCollectionDate.AddHours(hoursStart)) //if it is too early, invalid

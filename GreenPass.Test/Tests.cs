@@ -29,7 +29,7 @@ namespace TestProject1
         public async Task Test()
         {
             //insert a valid green pass data here, it can be obtained scanning the QR Code
-            var scanResult = "HC1:....";
+            var scanResult = "HC1:...";
             var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult);
             Assert.IsFalse(res.IsInvalid);
         }
