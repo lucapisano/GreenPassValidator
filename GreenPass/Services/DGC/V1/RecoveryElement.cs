@@ -1,162 +1,52 @@
-
+﻿
 namespace DGCValidator.Services.DGC.V1
 {
-    using System.Collections.Generic;
-
-    using System.Globalization;
+    using System;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
 
     /// <summary>
-    /// EU Digital Green Certificate
+    /// Recovery Entry
     /// </summary>
-    public partial class EU_DGC
+    public partial class RecoveryElement
     {
         /// <summary>
-        /// Date of Birth of the person addressed in the DGC. ISO 8601 date format restricted to
-        /// range 1900-2099
+        /// Unique Certificate Identifier, UVCI
         /// </summary>
-        [JsonProperty("dob")]
-        public string Dob { get; set; }
+        [JsonProperty("ci")]
+        public string CertificateId { get; set; }
 
         /// <summary>
-        /// Surname(s), given name(s) - in that order
+        /// Country of Test
         /// </summary>
-        [JsonProperty("nam")]
-        public Nam Nam { get; set; }
+        [JsonProperty("co")]
+        public string Country { get; set; }
 
         /// <summary>
-        /// Recovery Group
+        /// ISO 8601 Date: Certificate Valid From
         /// </summary>
-        [JsonProperty("r", NullValueHandling = NullValueHandling.Ignore)]
-        public RecoveryElement[] Recoveries { get; set; }
+        [JsonProperty("df")]
+        public DateTimeOffset ValidFrom { get; set; }
 
         /// <summary>
-        /// Test Group
+        /// Certificate Valid Until
         /// </summary>
-        [JsonProperty("t", NullValueHandling = NullValueHandling.Ignore)]
-        public TestElement[] Tests { get; set; }
+        [JsonProperty("du")]
+        public DateTimeOffset ValidUntil { get; set; }
 
         /// <summary>
-        /// Vaccination Group
+        /// ISO 8601 Date of First Positive Test Result
         /// </summary>
-        [JsonProperty("v", NullValueHandling = NullValueHandling.Ignore)]
-        public VaccinationElement[] Vaccinations { get; set; }
+        [JsonProperty("fr")]
+        public DateTimeOffset FirstPositiveDate { get; set; }
 
         /// <summary>
-        /// Version of the schema, according to Semantic versioning (ISO, https://semver.org/ version
-        /// 2.0.0 or newer)
+        /// Certificate Issuer
         /// </summary>
-        [JsonProperty("ver")]
-        public string Ver { get; set; }
-    }
+        [JsonProperty("is")]
+        public string Issuer { get; set; }
 
-    /// <summary>
-    /// Surname(s), given name(s) - in that order
-    ///
-    /// Person name: Surname(s), given name(s) - in that order
-    /// </summary>
-    public partial class Nam
-    {
-        /// <summary>
-        /// The family or primary name(s) of the person addressed in the certificate
-        /// </summary>
-        [JsonProperty("fn", NullValueHandling = NullValueHandling.Ignore)]
-        public string Fn { get; set; }
-
-        /// <summary>
-        /// The family name(s) of the person transliterated
-        /// </summary>
-        [JsonProperty("fnt")]
-        public string Fnt { get; set; }
-
-        /// <summary>
-        /// The given name(s) of the person addressed in the certificate
-        /// </summary>
-        [JsonProperty("gn", NullValueHandling = NullValueHandling.Ignore)]
-        public string Gn { get; set; }
-
-        /// <summary>
-        /// The given name(s) of the person transliterated
-        /// </summary>
-        [JsonProperty("gnt", NullValueHandling = NullValueHandling.Ignore)]
-        public string Gnt { get; set; }
-    }
-
-    ///// <summary>
-    ///// EU eHealthNetwork: Value Sets for Digital Green Certificates. version 1.0, 2021-04-16,
-    ///// section 2.1
-    /////
-    ///// disease or agent targeted
-    ///// </summary>
-    //public enum Tg { The840539006 };
-
-    ///// <summary>
-    ///// RAT Test name and manufacturer
-    /////
-    ///// EU eHealthNetwork: Value Sets for Digital Green Certificates. version 1.0, 2021-04-16,
-    ///// section 2.8
-    ///// </summary>
-    //public enum TMa { The1065, The1097, The1162, The1173, The1180, The1218, The1223, The1232, The1242, The1244, The1268, The1271, The1304, The1331, The1333, The1343, The1360, The1363, The1481, The1484, The1489, The1767, The344, The345 };
-
-    ///// <summary>
-    ///// Test Result
-    /////
-    ///// EU eHealthNetwork: Value Sets for Digital Green Certificates. version 1.0, 2021-04-16,
-    ///// section 2.9
-    ///// </summary>
-    //public enum Tr { The260373001, The260415000 };
-
-    ///// <summary>
-    ///// Marketing Authorization Holder - if no MAH present, then manufacturer
-    /////
-    ///// EU eHealthNetwork: Value Sets for Digital Green Certificates. version 1.0, 2021-04-16,
-    ///// section 2.4
-    ///// </summary>
-    //public enum VMa { BharatBiotech, GamaleyaResearchInstitute, Org100001417, Org100001699, Org100006270, Org100010771, Org100013793, Org100020693, Org100024420, Org100030215, Org100031184, Org100032020, SinovacBiotech, VectorInstitute };
-
-    ///// <summary>
-    ///// vaccine medicinal product
-    /////
-    ///// EU eHealthNetwork: Value Sets for Digital Green Certificates. version 1.0, 2021-04-16,
-    ///// section 2.3
-    ///// </summary>
-    //public enum Mp { BbibpCorV, CVnCoV, Convidecia, CoronaVac, Covaxin, EpiVacCorona, Eu1201507, Eu1201525, Eu1201528, Eu1211529, InactivatedSarsCoV2VeroCell, NvxCoV2373, SputnikV };
-
-    ///// <summary>
-    ///// vaccine or prophylaxis
-    /////
-    ///// EU eHealthNetwork: Value Sets for Digital Green Certificates. version 1.0, 2021-04-16,
-    ///// section 2.2
-    ///// </summary>
-    //public enum Vp { J07Bx03, The1119305005, The1119349007 };
-
-    public partial class EU_DGC
-    {
-        public static EU_DGC FromJson(string json) => JsonConvert.DeserializeObject<EU_DGC>(json, Converter.Settings);
-    }
-
-    public static class Serialize
-    {
-        public static string ToJson(this EU_DGC self) => JsonConvert.SerializeObject(self, Converter.Settings);
-    }
-
-    internal static class Converter
-    {
-        public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-        {
-            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-            DateParseHandling = DateParseHandling.None,
-            Converters = {
-/*                TgConverter.Singleton,
-                TMaConverter.Singleton,
-                TrConverter.Singleton,
-                VMaConverter.Singleton,
-                MpConverter.Singleton,
-                VpConverter.Singleton,*/
-                new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-            },
-        };
+        [JsonProperty("tg")]
+        public string Tg { get; set; }
     }
 
     //internal class TgConverter : JsonConverter
