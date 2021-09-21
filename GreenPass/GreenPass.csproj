@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	  <Authors>Luca Pisano</Authors>
-	  <Version>0.5</Version>
+	  <Version>0.6</Version>
 	  <IsPackable>true</IsPackable>
 	  <Title>Green Pass</Title>
 	  <Description>This package enables reading and validating the European Digital Green Certificate also known as Green Pass</Description>

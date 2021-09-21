@@ -1,4 +1,9 @@
 # GreenPass
+## Demo [GreenPass API](https://greenpassapi.azurewebsites.net)
+To use the demo, call any of the methods available under the Validation controller passing GreenPass raw string as input (e.g. HC1:...)
+The trust list and business rules are updated every 24h.
+This demo adheres to Italian official rules for date expiration calculation but is provided without any legal guarantee, no SLA and no uptime guarantee.
+
 ## By [Luca Pisano](https://lucapisano.it)
 
 This package enables Green Pass QR code reading and reading

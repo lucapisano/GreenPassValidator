@@ -1,0 +1,24 @@
+
+{
+    "Information" : [
+        "This file provides default values for the deployment wizard inside Visual Studio and the AWS Lambda commands added to the .NET Core CLI.",
+        "To learn more about the Lambda commands with the .NET Core CLI execute the following command at the command line in the project root directory.",
+        "dotnet lambda help",
+        "All the command line options for the Lambda command can be specified in this file."
+    ],
+    "profile"     : "default",
+    "region"      : "eu-south-1",
+    "configuration" : "Release",
+    "framework"     : "netcoreapp3.1",
+    "function-runtime" : "dotnetcore3.1",
+    "function-memory-size" : 128,
+    "function-timeout"     : 30,
+    "function-handler"     : "GreenPass.Lambda::GreenPass.Lambda.Function::JsonResult",
+    "function-name"        : "GreenPass_Lambda_Json",
+    "function-description" : "Returns a JSON containing the Green Pass, after having validated it",
+    "package-type"         : "Zip",
+    "function-role"        : "arn:aws:iam::756616156915:role/lambda_exec_GreenPass.Lambda.IsValid",
+    "tracing-mode"         : "PassThrough",
+    "environment-variables" : "",
+    "image-tag"             : ""
+}

@@ -45,7 +45,14 @@ namespace DGCValidator.Services
             if (trustList != null && trustList.DscTrustList != null && trustList.DscTrustList.Count > 0 && trustList.Exp > GetSecondsFromEpoc())
             {
                 TrustList = trustList;
-                File.WriteAllText(_opt.Value.CacheTrustListFileName, DSC_TLSerialize.ToJson(trustList));
+                try
+                {
+                    File.WriteAllText(_opt.Value.CacheTrustListFileName, DSC_TLSerialize.ToJson(trustList));
+                }
+                catch(Exception e)
+                {
+                    //_logger?.LogWarning($"unable to cache trust list file");
+                }
             }
         }
 
