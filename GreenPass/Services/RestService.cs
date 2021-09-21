@@ -58,7 +58,7 @@ namespace DGCValidator.Services
         {
             try
             {
-                string[] contents = content.Split(".");
+                string[] contents = content.Split('.');
                 byte[] headerBytes = Base64UrlDecode(contents[0]);
                 byte[] payloadBytes = Base64UrlDecode(contents[1]);
                 byte[] signatureBytes = Base64UrlDecode(contents[2]);

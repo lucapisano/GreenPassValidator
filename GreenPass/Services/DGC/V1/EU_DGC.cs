@@ -162,7 +162,7 @@ namespace DGCValidator.Services.DGC.V1
         /// RAT Test name and manufacturer
         /// </summary>
         [JsonProperty("ma", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Manufacturer { get; set; }
+        public string Manufacturer { get; set; }
 
         /// <summary>
         /// NAA Test Name

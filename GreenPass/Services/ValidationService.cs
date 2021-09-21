@@ -18,8 +18,7 @@ using GreenPass.Models;
 namespace GreenPass
 {
     /**
-     * A Crypto support class for the reading of the European Digital Green Certificate.
-     *
+     * @author Luca Pisano (luca@lucapisano.it)
      * @author Henrik Bengtsson (henrik@sondaica.se)
      * @author Martin Lindström (martin@idsec.se)
      * @author Henric Norlander (extern.henric.norlander@digg.se)
@@ -91,14 +90,14 @@ namespace GreenPass
                 if (last == default)
                     return default;
                 var applicableRules = rules.Where(x => x.Name.Contains("_test_")); //TODO: unknown distinction between TestTypes
-                int daysStart = 0;
-                int.TryParse(applicableRules.FirstOrDefault(x=>x.Name.Contains("start"))?.Value, out daysStart);
-                if (GetActualDate() < last.SampleCollectionDate.AddDays(daysStart)) //if it is too early, invalid
+                int hoursStart = 0;
+                int.TryParse(applicableRules.FirstOrDefault(x=>x.Name.Contains("start"))?.Value, out hoursStart);
+                if (GetActualDate() < last.SampleCollectionDate.AddHours(hoursStart)) //if it is too early, invalid
                     return true;
 
-                int daysEnd = 0;
-                int.TryParse(applicableRules.FirstOrDefault(x => x.Name.Contains("end"))?.Value, out daysEnd);
-                if (GetActualDate() > last.SampleCollectionDate.AddDays(daysEnd)) //if it is too late, invalid
+                int hoursEnd = 0;
+                int.TryParse(applicableRules.FirstOrDefault(x => x.Name.Contains("end"))?.Value, out hoursEnd);
+                if (GetActualDate() > last.SampleCollectionDate.AddHours(hoursEnd)) //if it is too late, invalid
                     return true;
                 return false;
             }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DGCValidator.Services.CWT.Certificates;
 using DGCValidator.Services.DGC.ValueSet;
+using GreenPass.Extensions;
 using GreenPass.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -44,7 +45,7 @@ namespace DGCValidator.Services
             if (trustList != null && trustList.DscTrustList != null && trustList.DscTrustList.Count > 0 && trustList.Exp > GetSecondsFromEpoc())
             {
                 TrustList = trustList;
-                await File.WriteAllTextAsync(_opt.Value.CacheTrustListFileName, DSC_TLSerialize.ToJson(trustList));
+                File.WriteAllText(_opt.Value.CacheTrustListFileName, DSC_TLSerialize.ToJson(trustList));
             }
         }
 
