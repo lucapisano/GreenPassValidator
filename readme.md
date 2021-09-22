@@ -10,11 +10,12 @@ This package enables Green Pass QR code reading and reading
 NuGet available at [NuGet.Org/packages/GreenPass](https://www.nuget.org/packages/GreenPass)
 ## Features
 
-- .NET Standard 2.1 runs on any platform. Docker, Windows, Linux, MacOS, Android, iOS, Smartwatches, Raspberry, Embedded Controllers, ecc
+- .NET Standard 2.0 runs on any platform. Docker, Windows, Linux, MacOS, Android, iOS, Smartwatches, Raspberry, Embedded Controllers, ecc
 - Decode QR Code string into readable JSON
 - Verify GreenPass using official Trust List servers
 - Validation certificates caching for configurable TimeSpan to improve performance (default is 24h)
 - Support for custom Trust List servers is provided using appsettings.json
+- Very Green Pass expiry date according to Italian rules
 
 Current implementation does not check for certificate revocation lists, if any jurisdiction uses them.
 
