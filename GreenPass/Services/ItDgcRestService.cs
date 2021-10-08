@@ -167,15 +167,18 @@ namespace DGCValidator.Services
                 getNextUpdate = (response.StatusCode == HttpStatusCode.OK) && (!string.IsNullOrEmpty(resumeToken));
             } while (getNextUpdate);
 
-            // TODO set expiration
 
-            // TODO findout how SE (original) provider sets it
-
-            // TODO set issuer
+            // set issuer
+            trustList.Iss = baseUri.ToString();
 
             // set issue date
-            trustList.Iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var now = DateTimeOffset.Now;
+            trustList.Iat = now.ToUnixTimeSeconds();
 
+            // set expiration to tomorrow at 3 AM
+            // WARN this is an arbitrary rule
+            // TODO find a better rule
+            trustList.Exp = now.AddHours(24-now.Hour+3).ToUnixTimeSeconds();
             return trustList;
         }
         
