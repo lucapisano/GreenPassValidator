@@ -66,14 +66,15 @@ namespace DGCValidator.Services
             List<string> signerCertificates = new List<string>();
             string resumeToken = "0";
             trustList.DscTrustList = new Dictionary<string, DscTrust>();
-            //TODO: loop through updates. 
+            
+            // loop through updates
             var getNextUpdate = false;
             var RESUME_TOKEN_HEADER_KEY = "X-RESUME-TOKEN";
             var KID = "X-KID";
             do
             {
                 RestRequest request = null;
-                //get update
+                // get update
                 try
                 {
                     request = new RestRequest(updatePath);
@@ -95,11 +96,11 @@ namespace DGCValidator.Services
                 }
                 var responseHeaders = response.Headers.ToList();
                 var kid = responseHeaders.Find(x => x.Name == KID);
-                //get kid & resume token from headers
+                // get kid & resume token from headers
                 if (kid == null) break;
                 else targetKid = kid.Value.ToString();
 
-                //check if received kid is valid
+                // check if received kid is valid
                 if (validKids.Contains(targetKid))
                 {
                     var responseText = string.Empty;
@@ -179,6 +180,7 @@ namespace DGCValidator.Services
             // WARN this is an arbitrary rule
             // TODO find a better rule
             trustList.Exp = now.AddHours(24-now.Hour+3).ToUnixTimeSeconds();
+
             return trustList;
         }
         
