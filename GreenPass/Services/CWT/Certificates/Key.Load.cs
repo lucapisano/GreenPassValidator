@@ -19,7 +19,16 @@ namespace DGCValidator.Services.CWT.Certificates
         public static Key LoadFromX509(byte[] rawData)
         {
             if (rawData.Length <= 0) return null;
-            var certificate = new X509Certificate2(rawData, string.Empty, X509KeyStorageFlags.Exportable);
+
+            /* Ref:https://github.com/dotnet/runtime/issues/47005
+             * var certificate = new X509Certificate2(rawData, string.Empty, X509KeyStorageFlags.Exportable);
+             * leads to
+             * System.Formats.Asn1.AsnContentException: The provided data is tagged with 'Application' class value '13', but it should have been 'Universal' class value '16'.
+             *
+             * Linux & MacOS aren't base64 decoding the string for us, like Windows is doing.
+             */
+
+            var certificate = new X509Certificate2(Convert.FromBase64String(Encoding.ASCII.GetString(rawData)), string.Empty, X509KeyStorageFlags.Exportable);
             var ECDsaPk = certificate.GetECDsaPublicKey();
             var RsaPK = certificate.GetRSAPublicKey();
             var Jwk = new JsonWebKey();

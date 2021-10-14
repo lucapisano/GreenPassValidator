@@ -121,7 +121,7 @@ namespace DGCValidator.Services
                     var jwk = Key.LoadFromX509(bytes) ;
 
                     //  prepare trustList
-                    var certificate = new X509Certificate2(bytes);
+                    var certificate = new X509Certificate2(Convert.FromBase64String(signerCert));
                     // find certificate issuer
                     var iss = certificate.Issuer.Split(',');
                     var cc = string.Empty;
