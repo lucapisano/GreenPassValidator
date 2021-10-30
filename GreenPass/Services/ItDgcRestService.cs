@@ -176,10 +176,10 @@ namespace DGCValidator.Services
             var now = DateTimeOffset.Now;
             trustList.Iat = now.ToUnixTimeSeconds();
 
-            // set expiration to tomorrow at 3 AM
+            // set expiration to tomorrow at 4 AM
             // WARN this is an arbitrary rule
             // TODO find a better rule
-            trustList.Exp = now.AddHours(24-now.Hour+3).ToUnixTimeSeconds();
+            trustList.Exp = now.Subtract(now.TimeOfDay).AddDays(1).AddHours(4).ToUnixTimeSeconds();
 
             return trustList;
         }
