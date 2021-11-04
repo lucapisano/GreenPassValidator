@@ -25,14 +25,42 @@ namespace TestProject1
             _sp = sc.BuildServiceProvider();
             _certManager = _sp.GetRequiredService<CertificateManager>();
         }
+
         [TestMethod]
         public async Task Test()
         {
             //insert a valid green pass data here, it can be obtained scanning the QR Code
-            var scanResult = "HC1:...";
+            var scanResult = "HC1:";
             var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult);
             Assert.IsFalse(res.IsInvalid);
         }
+
+        [TestMethod]
+        public async Task TestInvalid_ADOLF_HITLER()
+        {
+            // ADOLF HITLER black listed
+            var scanResult = "HC1:6BFOXN%TSMAHN-H3YS1IK47ES6IXJR4E47X5*T917VF+UOGIS1RYZV:X9:IMJZTCV4*XUA2PSGH.+H$NI4L6HUC%UG/YL WO*Z7ON13:LHNG7H8H%BFP8FG4T 9OKGUXI$NIUZUK*RIMI4UUIMI.J9WVHWVH+ZEOV1AT1HRI2UHD4TR/S09T./08H0AT1EYHEQMIE9WT0K3M9UVZSVV*001HW%8UE9.955B9-NT0 2$$0X4PCY0+-CVYCRMTB*05*9O%0HJP7NVDEBO584DKH78$ZJ*DJWP42W5P0QMO6C8PL353X7H1RU0P48PCA7T5MCH5:ZJ::AKU2UM97H98$QP3R8BH9LV3*O-+DV8QJHHY4I4GWU-LU7T9.V+ T%UNUWUG+M.1KG%VWE94%ALU47$71MFZJU*HFW.6$X50*MSYOJT1MR96/1Z%FV3O-0RW/Q.GMCQS%NE";
+            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult);
+
+            Assert.AreEqual(res.Dgc.Nam.Gn, "ADOLF");
+            Assert.AreEqual(res.Dgc.Nam.Fn, "HITLER");
+
+            Assert.IsTrue(res.IsInvalid);
+        }
+
+        [TestMethod]
+        public async Task TestInvalid_MICKEY_MOUSE()
+        {
+            // MICKEY MOUSE black listed
+            var scanResult = "HC1:6BFOXN%TSMAHN-H3YS1IK47ES6IXJR4E47X5*T917VF+UOGIS1RYZV:X9RLMSV9 NI4EFSYS:%OD3PYE9*FJ9QMQC8$.AIGCY0K5$0V-AVB85PSHDCR.9K%47IG$+9OPPYE97NVA.D9B92FF9B9LW4G%89-85QNC%05$0VD9%.OMRE/IE%TE6UGYGGCY0$2P0GB*$K8KG+9RR$F+ F%J00N89M40%KLR2A KZ*U0I1-I0*OC6H0/VMNPM/UESJ0A5L5M0G+SI*VSDKPZ0CN62XEAW1 WUQRELS4J1TZWV63HUTN /K9:KFKF+SF3*86AL3*IC%OYZQ5I9 LG/HLIJLKNF8JF172QDRB2C3OUW3IQ6RYMKHDV4*F -IMBCJIO%OA8EV/G3L-NG:2EQB*:C8FFIVT:1QI 8NIMW:BW$BY$M/+8%RFV8C3LVZ:2T+8IQ9LF8I66WWD";
+            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult);
+
+            Assert.AreEqual(res.Dgc.Nam.Gn, "MICKEY");
+            Assert.AreEqual(res.Dgc.Nam.Fn, "MOUSE");
+
+            Assert.IsTrue(res.IsInvalid);
+        }
+
         [TestMethod]
         public async Task ValidateIssuingCertificate()
         {

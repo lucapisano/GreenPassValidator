@@ -23,9 +23,6 @@
     <None Update="belgium.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="cached_trust_list.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="testconfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

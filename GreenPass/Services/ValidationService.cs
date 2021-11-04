@@ -77,7 +77,8 @@ namespace GreenPass
             var recovery = IsRecoveryInvalid(vacProof.Dgc);
             var vaccination = IsVaccinationInvalid(vacProof.Dgc, rules);
             var test = IsTestInvalid(vacProof.Dgc, rules);
-            if (recovery.GetValueOrDefault() || vaccination.GetValueOrDefault() || test.GetValueOrDefault())//default is false
+            var blaklist = IsBlackListed(vacProof.Dgc, rules);
+            if (recovery.GetValueOrDefault() || vaccination.GetValueOrDefault() || test.GetValueOrDefault() || blaklist.GetValueOrDefault())//default is false
                 vacProof.IsInvalid = true;
             else
                 vacProof.IsInvalid = GetActualDate()>vacProof.CertificateExpirationDate;
@@ -142,6 +143,29 @@ namespace GreenPass
                 return default; 
             }
         }
+
+        bool? IsBlackListed(EU_DGC dgc, List<RemoteRule> rules)
+        {
+            try
+            {
+                var blacklistRule = rules.SingleOrDefault(x => x.Name == "black_list_uvci");
+
+                if (!string.IsNullOrWhiteSpace(blacklistRule.Value))
+                {
+                    foreach (var vac in dgc.Vaccinations)
+                    {
+                        if (blacklistRule.Value.IndexOf(vac.CertificateId, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+                    }
+                }
+
+                return false; //otherwise return false
+            }
+            catch (Exception e)
+            {
+                return default;
+            }
+        }
+
         bool? IsRecoveryInvalid(EU_DGC dgc)
         {
             try
