@@ -150,7 +150,7 @@ namespace GreenPass
             {
                 var blacklistRule = rules.SingleOrDefault(x => x.Name == "black_list_uvci");
 
-                if (!string.IsNullOrWhiteSpace(blacklistRule.Value))
+                if (!string.IsNullOrWhiteSpace(blacklistRule?.Value))
                 {
                     foreach (var vac in dgc.Vaccinations)
                     {
