@@ -210,7 +210,7 @@ namespace GreenPass
             }
         }
 
-        protected static async Task<byte[]> VerifySignedData(byte[] signedData, SignedDGC vacProof, CertificateManager certificateManager, ILogger logger)
+        protected static async Task<byte[]> VerifySignedData(byte[] signedData, SignedDGC vacProof, CertificateManager certificateManager, ILogger<ValidationService> logger)
         {
             DGCVerifier verifier = new DGCVerifier(certificateManager, logger);
             return await verifier.VerifyAsync(signedData, vacProof);

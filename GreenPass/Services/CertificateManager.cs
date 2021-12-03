@@ -8,6 +8,7 @@ using DGCValidator.Services.DGC.ValueSet;
 using GreenPass.Extensions;
 using GreenPass.Options;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto;
@@ -28,6 +29,7 @@ namespace DGCValidator.Services
     {
         private readonly IServiceProvider _sp;
         private readonly IOptions<ValidatorOptions> _opt;
+        private readonly ILogger<CertificateManager> _logger;
         private readonly IRestService _restService;
         public Dictionary<string, ValueSet> ValueSets { get; private set; }
         public DSC_TL TrustList { get; private set; }
@@ -37,6 +39,7 @@ namespace DGCValidator.Services
         {
             _sp = sp;
             _opt = _sp.GetRequiredService<IOptions<ValidatorOptions>>();
+            _logger = _sp.GetService<ILogger<CertificateManager>>();
             _restService = service;
         }
         public async Task RefreshTrustListAsync()
@@ -51,7 +54,7 @@ namespace DGCValidator.Services
                 }
                 catch(Exception e)
                 {
-                    //_logger?.LogWarning($"unable to cache trust list file");
+                    _logger?.LogWarning(e, $"unable to cache trust list file");
                 }
             }
         }
