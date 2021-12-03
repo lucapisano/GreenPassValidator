@@ -14,6 +14,7 @@ using GreenPass.Services;
 using System.Linq;
 using System.Collections.Generic;
 using GreenPass.Models;
+using Microsoft.Extensions.Logging;
 
 namespace GreenPass
 {
@@ -26,19 +27,22 @@ namespace GreenPass
     public class ValidationService
     {
         private readonly CertificateManager _certManager;
-        private readonly IServiceProvider _sp;
+        private CachingService _cachingService;
+        private ILogger<ValidationService> _logger;
 
         public ValidationService(CertificateManager certificateManager, IServiceProvider sp)
         {
             _certManager = certificateManager;
-            _sp = sp;
+            _cachingService = sp.GetRequiredService<CachingService>();
+            _logger = sp.GetService<ILogger<ValidationService>>();
         }
 
         public async Task<SignedDGC> Validate(String codeData)
         {
-            try {
+            try
+            {
                 // The base45 encoded data shoudl begin with HC1
-                if( codeData.StartsWith("HC1:"))
+                if (codeData.StartsWith("HC1:"))
                 {
                     string base45CodedData = codeData.Substring(4);
 
@@ -50,7 +54,7 @@ namespace GreenPass
 
                     SignedDGC vacProof = new SignedDGC();
                     // Sign and encrypt data
-                    byte[] signedData = await VerifySignedData(uncompressedData, vacProof, _certManager);
+                    byte[] signedData = await VerifySignedData(uncompressedData, vacProof, _certManager, _logger);
 
                     // Get json from CBOR representation of ProofCode
                     EU_DGC eU_DGC = GetVaccinationProofFromCbor(signedData);
@@ -59,9 +63,9 @@ namespace GreenPass
                     return vacProof;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger?.LogError(e, "An exception occurred during validation");
                 throw e;
             }
             return null;
@@ -72,8 +76,7 @@ namespace GreenPass
         }
         async Task ApplyExpirationDate(SignedDGC vacProof)
         {
-            var svc = _sp.GetRequiredService<CachingService>();
-            var rules = await svc.GetRules();
+            var rules = await _cachingService.GetRules();
             var recovery = IsRecoveryInvalid(vacProof.Dgc);
             var vaccination = IsVaccinationInvalid(vacProof.Dgc, rules);
             var test = IsTestInvalid(vacProof.Dgc, rules);
@@ -81,7 +84,7 @@ namespace GreenPass
             if (recovery.GetValueOrDefault() || vaccination.GetValueOrDefault() || test.GetValueOrDefault() || blaklist.GetValueOrDefault())//default is false
                 vacProof.IsInvalid = true;
             else
-                vacProof.IsInvalid = GetActualDate()>vacProof.CertificateExpirationDate;
+                vacProof.IsInvalid = GetActualDate() > vacProof.CertificateExpirationDate;
         }
         bool? IsTestInvalid(EU_DGC dgc, List<RemoteRule> rules)
         {
@@ -98,11 +101,11 @@ namespace GreenPass
                 else if (last.TestType == RapidType)
                     testTypeName = "rapid";
                 Func<RemoteRule, bool> predicate = x => x.Name.Contains("_test_");
-                if(testTypeName!=default)
-                    predicate= x => x.Name.Contains(testTypeName) && x.Name.Contains("_test_");
+                if (testTypeName != default)
+                    predicate = x => x.Name.Contains(testTypeName) && x.Name.Contains("_test_");
                 var applicableRules = rules.Where(predicate);
                 int hoursStart = 0;
-                int.TryParse(applicableRules.FirstOrDefault(x=>x.Name.Contains("start"))?.Value, out hoursStart);
+                int.TryParse(applicableRules.FirstOrDefault(x => x.Name.Contains("start"))?.Value, out hoursStart);
                 if (GetActualDate() < last.SampleCollectionDate.AddHours(hoursStart)) //if it is too early, invalid
                     return true;
 
@@ -112,35 +115,38 @@ namespace GreenPass
                     return true;
                 return false;
             }
-            catch(Exception e) { 
-                return default; 
+            catch (Exception e)
+            {
+                return default;
             }
         }
         bool? IsVaccinationInvalid(EU_DGC dgc, List<RemoteRule> rules)
         {
-            try { 
-            var last = dgc.Vaccinations?.OrderByDescending(x => x.Date).FirstOrDefault();
-            if (last == default)
-                return default;
-            var applicableRules = rules.Where(x => x.Type == last.MedicinalProduct);
-            var isComplete = last.DoseNumber >= last.SeriesOfDoses;
-            string ruleNameStart = $"vaccine_start_day_{(isComplete?"complete":"not_complete")}";
-            string ruleNameEnd = $"vaccine_end_day_{(isComplete?"complete":"not_complete")}";
+            try
+            {
+                var last = dgc.Vaccinations?.OrderByDescending(x => x.Date).FirstOrDefault();
+                if (last == default)
+                    return default;
+                var applicableRules = rules.Where(x => x.Type == last.MedicinalProduct);
+                var isComplete = last.DoseNumber >= last.SeriesOfDoses;
+                string ruleNameStart = $"vaccine_start_day_{(isComplete ? "complete" : "not_complete")}";
+                string ruleNameEnd = $"vaccine_end_day_{(isComplete ? "complete" : "not_complete")}";
 
-            int daysAfterStart = 0;
-            int.TryParse(applicableRules.FirstOrDefault(x => x.Name == ruleNameStart)?.Value, out daysAfterStart);
+                int daysAfterStart = 0;
+                int.TryParse(applicableRules.FirstOrDefault(x => x.Name == ruleNameStart)?.Value, out daysAfterStart);
 
-            int daysFromEnd = 0;
-            int.TryParse(applicableRules.FirstOrDefault(x => x.Name == ruleNameEnd)?.Value, out daysFromEnd);
+                int daysFromEnd = 0;
+                int.TryParse(applicableRules.FirstOrDefault(x => x.Name == ruleNameEnd)?.Value, out daysFromEnd);
 
-            if (GetActualDate()<last.Date.AddDays(daysAfterStart)) //if it is too early, invalid
-                return true;
-            if (GetActualDate() > last.Date.AddDays(daysFromEnd)) //if it is too late, invalid
-                return true;
-            return false;//otherwise return false
+                if (GetActualDate() < last.Date.AddDays(daysAfterStart)) //if it is too early, invalid
+                    return true;
+                if (GetActualDate() > last.Date.AddDays(daysFromEnd)) //if it is too late, invalid
+                    return true;
+                return false;//otherwise return false
             }
-            catch (Exception e) { 
-                return default; 
+            catch (Exception e)
+            {
+                return default;
             }
         }
 
@@ -173,19 +179,20 @@ namespace GreenPass
                 var date = dgc.Recoveries?.OrderByDescending(x => x.ValidUntil).FirstOrDefault()?.ValidUntil.DateTime;
                 if (date == default)
                     return default;
-                return GetActualDate()>date;
+                return GetActualDate() > date;
             }
-            catch (Exception e) { 
-                return default; 
+            catch (Exception e)
+            {
+                return default;
             }
         }
         DateTime GetActualDate()
         {
             return DateTime.Now;
         }
-		protected static byte[] ZlibDecompression(byte[] compressedData)
+        protected static byte[] ZlibDecompression(byte[] compressedData)
         {
-            if( compressedData[0] == 0x78 )
+            if (compressedData[0] == 0x78)
             {
                 var outputStream = new MemoryStream();
                 using (var compressedStream = new MemoryStream(compressedData))
@@ -203,20 +210,20 @@ namespace GreenPass
             }
         }
 
-		protected static async Task<byte[]> VerifySignedData(byte[] signedData, SignedDGC vacProof, CertificateManager certificateManager)
+        protected static async Task<byte[]> VerifySignedData(byte[] signedData, SignedDGC vacProof, CertificateManager certificateManager, ILogger logger)
         {
-            DGCVerifier verifier = new DGCVerifier(certificateManager);
+            DGCVerifier verifier = new DGCVerifier(certificateManager, logger);
             return await verifier.VerifyAsync(signedData, vacProof);
         }
 
         protected static byte[] Base45Decoding(byte[] encodedData)
         {
             byte[] uncodedData = Base45.Decode(encodedData);
-			return uncodedData;
+            return uncodedData;
         }
 
         protected static EU_DGC GetVaccinationProofFromCbor(byte[] cborData)
-		{
+        {
             CBORObject cbor = CBORObject.DecodeFromBytes(cborData, CBOREncodeOptions.Default);
             string json = cbor.ToJSONString();
             EU_DGC vacProof = EU_DGC.FromJson(cbor.ToJSONString());
@@ -224,5 +231,5 @@ namespace GreenPass
         }
 
 
-	}
+    }
 }
