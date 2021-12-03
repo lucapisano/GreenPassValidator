@@ -3,5 +3,12 @@
     "CertificateListProviderUrl": "https://get.dgc.gov.it/v1/dgc/",
     "RulesProviderUrl": "https://get.dgc.gov.it/v1/dgc/settings",
     "CacheTrustListFileName": "cached_trust_list.json"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
   }
 }

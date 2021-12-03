@@ -272,7 +272,6 @@ namespace DGCValidator.Services.CWT
             {
                 throw new CertificateValidationException("Signature did not verify correctly");
             }
-            Console.WriteLine("result: " + result);
         }
 
         /**
