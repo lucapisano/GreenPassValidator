@@ -29,6 +29,12 @@ namespace GreenPass
         private readonly CertificateManager _certManager;
         private CachingService _cachingService;
         private ILogger<ValidationService> _logger;
+        public enum ValidationType
+        {
+            ThreeG, // base validation
+            TwoG,   // reinforced validation
+            Boosted // boosted validation
+        };
 
         public ValidationService(CertificateManager certificateManager, IServiceProvider sp)
         {
@@ -37,11 +43,11 @@ namespace GreenPass
             _logger = sp.GetService<ILogger<ValidationService>>();
         }
 
-        public async Task<SignedDGC> Validate(String codeData)
+        public async Task<SignedDGC> Validate(String codeData, ValidationType validationMode = ValidationType.ThreeG)
         {
             try
             {
-                // The base45 encoded data shoudl begin with HC1
+                // The base45 encoded data should begin with HC1
                 if (codeData.StartsWith("HC1:"))
                 {
                     string base45CodedData = codeData.Substring(4);
@@ -60,6 +66,23 @@ namespace GreenPass
                     EU_DGC eU_DGC = GetVaccinationProofFromCbor(signedData);
                     vacProof.Dgc = eU_DGC;
                     await ApplyRules(vacProof);
+
+                    // TODO: check for different validation types
+                    // if validationMode == ThreeG (3G), do validation like normal;
+
+                    // else if TwoG (2G):
+                        // if DGC == test, then INVALID;
+                        // else if recovery, VALID or INVALID;
+                        // else if vaccination, VALID or INVALID; 
+
+                    // else if Booster:
+                        // if DGC == test, then INVALID;
+                        // else if recovery, TEST_NEEDED or INVALID;
+                        // else if vaccination:
+                            // if doseNum == 1, INVALID;
+                            // else if two doses, TEST_NEEDED or INVALID;
+                            // else if three or more doses, VALID or INVALID;
+
                     return vacProof;
                 }
             }
