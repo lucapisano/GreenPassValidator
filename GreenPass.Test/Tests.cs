@@ -36,6 +36,26 @@ namespace TestProject1
         }
 
         [TestMethod]
+        public async Task ValidTwoGValidationTest()
+        {
+            //insert a valid green pass data here, it can be obtained scanning the QR Code.
+            var scanResult = "HC1:";
+            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult, ValidationService.ValidationType.TwoG);
+            Assert.IsFalse(res.IsInvalid);
+        }
+        
+        [TestMethod]
+        public async Task InvalidTwoGValidationTest()
+        {
+            // to further test 2G validation, please provide a DGC of a valid Covid-19 test 
+            var scanResult = "HC1:";
+            var resTest = await _sp.GetRequiredService<ValidationService>().Validate(scanResult, ValidationService.ValidationType.TwoG);
+
+            // The validation result should be invalid, since is a 2G type which allows only recoveries and vaccinations
+            Assert.IsTrue(resTest.IsInvalid);
+        }
+
+        [TestMethod]
         public async Task TestInvalid_ADOLF_HITLER()
         {
             // ADOLF HITLER black listed

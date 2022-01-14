@@ -33,7 +33,7 @@ namespace GreenPass
         {
             ThreeG, // base validation
             TwoG,   // reinforced validation
-            Boosted // boosted validation
+            Booster // booster validation
         };
 
         public ValidationService(CertificateManager certificateManager, IServiceProvider sp)
@@ -67,23 +67,39 @@ namespace GreenPass
                     vacProof.Dgc = eU_DGC;
                     await ApplyRules(vacProof);
 
-                    // TODO: check for different validation types
-                    // if validationMode == ThreeG (3G), do validation like normal;
+                    // if dgc is invalid, return without checking other validation types
+                    if (vacProof.IsInvalid)
+                    {
+                        return vacProof;
+                    }
 
-                    // else if TwoG (2G):
-                        // if DGC == test, then INVALID;
-                        // else if recovery, VALID or INVALID;
-                        // else if vaccination, VALID or INVALID; 
+                    else
+                    {
+                        // check for different validation types
+                        // if validationMode == ThreeG (3G), do validation like normal
+                        if (validationMode == ValidationType.ThreeG)
+                        {
+                            return vacProof;
+                        }
 
-                    // else if Booster:
-                        // if DGC == test, then INVALID;
-                        // else if recovery, TEST_NEEDED or INVALID;
-                        // else if vaccination:
-                            // if doseNum == 1, INVALID;
-                            // else if two doses, TEST_NEEDED or INVALID;
-                            // else if three or more doses, VALID or INVALID;
+                        // TwoG (2G): "reinforced" validation, tests become invalid while vaccinations & recoveries stay valid
+                        else if (validationMode == ValidationType.TwoG)
+                        {
+                            // if DGC == test, then INVALID
+                            if (vacProof.Dgc.Tests != null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations == null)
+                            {
+                                vacProof.IsInvalid = true;
+                                return vacProof;
+                            }
 
-                    return vacProof;
+                            // else (recovery or vaccination), test stays valid
+                            return vacProof;
+                        }
+
+                        // TODO: implement booster validation
+                        
+                    }
+
                 }
             }
             catch (Exception e)
