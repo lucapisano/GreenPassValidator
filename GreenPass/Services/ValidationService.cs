@@ -29,10 +29,11 @@ namespace GreenPass
         private readonly CertificateManager _certManager;
         private CachingService _cachingService;
         private ILogger<ValidationService> _logger;
+
         public enum ValidationType
         {
-            ThreeG, // base validation
-            TwoG,   // reinforced validation
+            ThreeG, // 3G (vaccine, recovery, test): base validation
+            TwoG,   // 2G (vaccine, recovery): reinforced validation
             Booster // booster validation
         };
 
@@ -76,7 +77,8 @@ namespace GreenPass
                     else
                     {
                         // check for different validation types
-                        // if validationMode == ThreeG (3G), do validation like normal
+
+                        // if validationMode == ThreeG (3G), it is a base validation
                         if (validationMode == ValidationType.ThreeG)
                         {
                             return vacProof;
@@ -96,7 +98,93 @@ namespace GreenPass
                             return vacProof;
                         }
 
-                        // TODO: implement booster validation
+                        // Booster validation
+                        else if (validationMode == ValidationType.Booster)
+                        {
+                            // if DGC == test, then INVALID
+                            if (vacProof.Dgc.Tests != null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations == null)
+                            {
+                                vacProof.IsInvalid = true;
+                                return vacProof;
+                            }
+
+                            //else if recovery, then the DGC is valid, but it still needs to show a valid Covid-19 test so result is NEED_TESTING
+                            else if (vacProof.Dgc.Tests == null && vacProof.Dgc.Recoveries != null && vacProof.Dgc.Vaccinations == null)
+                            {
+                                vacProof.TestNeeded = true;
+                                return vacProof;
+                            }
+
+                            // !!! IMPORTANT WARNING: the code contained into the "if" from line 148 is not tested because there weren't enough test assets. Proceed at your own risk!
+                            // !!! If you have testing assets, please do use them to test this code
+
+                            // else if vaccination, there are additional parameters required
+                            else if (vacProof.Dgc.Tests == null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations != null)
+                            {
+                                // we need to check the dose number (dn) to series of doses (sd) ratio
+                                var vaccines = vacProof.Dgc.Vaccinations;
+                                foreach (var v in vaccines)
+                                {
+                                    var ratio = v.DoseNumber / v.SeriesOfDoses;
+
+                                    // if ratio is below 1, the vaccination cycle is incomplete. INVALID
+                                    if (ratio < 1)
+                                    {
+                                        vacProof.IsInvalid = true;
+                                        return vacProof;
+                                    }
+
+                                    // if ratio is over 1, then the vaccination cycle is completed and a booster dose was made. VALID
+                                    else if (ratio > 1)
+                                    {
+                                        return vacProof;
+                                    }
+
+                                    //if ratio is = 1, then we have to consider different cases
+                                    else if (ratio == 1)
+                                    {
+                                        // we need additional data: the medicinal product (mp), since the Johnson&Johnson vaccine cycle is mono-dose (so ratio could be = 1)
+                                        if (v.MedicinalProduct == "EU/1/20/1525") // J&J vaccine
+                                        {
+                                            if (v.DoseNumber == 1 && v.SeriesOfDoses == 1)
+                                            {
+                                                // cycle completed, but no booster dose made. TEST NEEDED
+                                                vacProof.TestNeeded = true;
+                                                return vacProof;
+                                            }
+                                            else if (v.DoseNumber == 2 && v.SeriesOfDoses == 2)
+                                            {
+                                                // cycle completed, and booster dose made. VALID
+                                                return vacProof;
+                                            }
+                                        }
+                                        else //for every other medicinal product
+                                        {
+                                            if (v.DoseNumber == 1)
+                                            {
+                                                // vaccination cycle incomplete. INVALID
+                                                vacProof.IsInvalid = true;
+                                                return vacProof;
+                                            }
+
+                                            else if (v.DoseNumber == 2)
+                                            {
+                                                // vaccination cycle completed, no booster dose. TEST NEEDED
+                                                vacProof.TestNeeded = true;
+                                                return vacProof;
+                                            }
+
+                                            else if (v.DoseNumber == 3)
+                                            {
+                                                // vaccination cycle completed + booster dose. VALID
+                                                return vacProof;
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
                         
                     }
 

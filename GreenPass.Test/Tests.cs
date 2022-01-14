@@ -56,6 +56,42 @@ namespace TestProject1
         }
 
         [TestMethod]
+        public async Task ValidBoosterValidationTest()
+        {
+            //insert a valid green pass here, one with a completed vaccination cycle + a booster dose. It can be obtained by scanning the QR Code
+            var scanResult = "HC1:";
+            
+            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult, ValidationService.ValidationType.Booster);
+            
+            Assert.IsFalse(res.IsInvalid);
+            Assert.IsFalse(res.TestNeeded);
+        }
+
+        [TestMethod]
+        public async Task InvalidBoosterValidationTest()
+        {
+            //insert a valid green pass here, but invalid for a booster validation (i.e. one for a Covid-19 test). It can be obtained by scanning the QR Code
+            var scanResult = "HC1:";
+            
+            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult, ValidationService.ValidationType.Booster);
+            
+            Assert.IsTrue(res.IsInvalid);
+            Assert.IsFalse(res.TestNeeded);
+        }
+
+        [TestMethod]
+        public async Task NeedTestBoosterValidationTest()
+        {
+            //insert a valid green pass here, one with a completed vaccination cycle but without a booster dose. It can be obtained by scanning the QR Code
+            var scanResult = "HC1:";
+            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult, ValidationService.ValidationType.Booster);
+            
+            //expected result : valid Dgc, but needs Covid-19 Test
+            Assert.IsFalse(res.IsInvalid);
+            Assert.IsTrue(res.TestNeeded);
+        }
+
+        [TestMethod]
         public async Task TestInvalid_ADOLF_HITLER()
         {
             // ADOLF HITLER black listed
