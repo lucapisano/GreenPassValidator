@@ -26,15 +26,38 @@ namespace GreenPass
      */
     public class ValidationService
     {
+        /*
+         * UPDATE 17-01-2022: added different validation types in order to enforce Italian DPCM specifications.
+         * Reference: https://github.com/ministero-salute/it-dgc-documentation/blob/master/SCANMODE.md 
+         * There are three different validation types:
+         * 3G is the base validation, it works as usual;
+         * 2G is the strengthened validation: if the DGC presented contains just a test, it is invalid. If it is a recovery or a vaccine, then it is valid;
+         * Booster validation is a validation which returns valid only if the DGC contains a complete vaccination cycle and a booster dose. If the DGC contains just a completed vaccination cycle or a recovery, it will ask the user to show a valid negative Covid-19 test.
+         * 
+         * The validation results become three:
+         * VALID: the DGC is valid.
+         * INVALID: the DGC is invalid.
+         * TEST_NEEDED: the DGC is valid, but it must be shown with a valid Covid-19 test.
+         */
+
+        /* 
+         * !!!IMPORTANT!!! 
+         * There is a borderline case regarding the validation for cross vaccinations using Johnson & Johnson vaccines. 
+         * Since the dn/sd ratio was not standardised at first, some EU States utilised a different approach from others to classify heterogeneous (cross) vaccinations. 
+         * In particular, a J&J vaccination completed with a booster dose of another medicinal product may be classified as a 2/2 dn/sd ratio, instead of 2/1 or 3/3, yielding a TEST_NEEDED result instead of a VALID one.
+         * This library DOES NOT implement this case, since the issue is being solved by the EU commission by standardising cross vaccinations         .
+         * See reference https://ec.europa.eu/commission/presscorner/detail/en/ip_21_6837 for further details.
+         */
+
         private readonly CertificateManager _certManager;
         private CachingService _cachingService;
         private ILogger<ValidationService> _logger;
 
         public enum ValidationType
         {
-            ThreeG, // 3G (vaccine, recovery, test): base validation
-            TwoG,   // 2G (vaccine, recovery): reinforced validation
-            Booster // booster validation
+            ThreeG, // 3G (vaccine OR recovery OR test): base validation
+            TwoG,   // 2G (vaccine OR recovery): reinforced validation
+            Booster // Booster validation : only vaccines with a completed cycle AND a booster dose are valid
         };
 
         public ValidationService(CertificateManager certificateManager, IServiceProvider sp)
@@ -66,128 +89,32 @@ namespace GreenPass
                     // Get json from CBOR representation of ProofCode
                     EU_DGC eU_DGC = GetVaccinationProofFromCbor(signedData);
                     vacProof.Dgc = eU_DGC;
+                    
+                    // apply national rules to validate
                     await ApplyRules(vacProof);
 
-                    // if dgc is invalid, return without checking other validation types
-                    if (vacProof.IsInvalid)
+
+                    // check for different validation types
+
+                    // if validationMode == ThreeG (3G), it is a base validation
+                    if (validationMode == ValidationType.ThreeG)
                     {
                         return vacProof;
                     }
 
-                    else
+                    // TwoG (2G): "reinforced" validation, tests become invalid while vaccinations & recoveries stay valid
+                    else if (validationMode == ValidationType.TwoG)
                     {
-                        // check for different validation types
-
-                        // if validationMode == ThreeG (3G), it is a base validation
-                        if (validationMode == ValidationType.ThreeG)
-                        {
-                            return vacProof;
-                        }
-
-                        // TwoG (2G): "reinforced" validation, tests become invalid while vaccinations & recoveries stay valid
-                        else if (validationMode == ValidationType.TwoG)
-                        {
-                            // if DGC == test, then INVALID
-                            if (vacProof.Dgc.Tests != null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations == null)
-                            {
-                                vacProof.IsInvalid = true;
-                                return vacProof;
-                            }
-
-                            // else (recovery or vaccination), test stays valid
-                            return vacProof;
-                        }
-
-                        // Booster validation
-                        else if (validationMode == ValidationType.Booster)
-                        {
-                            // if DGC == test, then INVALID
-                            if (vacProof.Dgc.Tests != null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations == null)
-                            {
-                                vacProof.IsInvalid = true;
-                                return vacProof;
-                            }
-
-                            //else if recovery, then the DGC is valid, but it still needs to show a valid Covid-19 test so result is NEED_TESTING
-                            else if (vacProof.Dgc.Tests == null && vacProof.Dgc.Recoveries != null && vacProof.Dgc.Vaccinations == null)
-                            {
-                                vacProof.TestNeeded = true;
-                                return vacProof;
-                            }
-
-                            // !!! IMPORTANT WARNING: the code contained into the "if" from line 148 is not tested because there weren't enough test assets. Proceed at your own risk!
-                            // !!! If you have testing assets, please do use them to test this code
-
-                            // else if vaccination, there are additional parameters required
-                            else if (vacProof.Dgc.Tests == null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations != null)
-                            {
-                                // we need to check the dose number (dn) to series of doses (sd) ratio
-                                var vaccines = vacProof.Dgc.Vaccinations;
-                                foreach (var v in vaccines)
-                                {
-                                    var ratio = v.DoseNumber / v.SeriesOfDoses;
-
-                                    // if ratio is below 1, the vaccination cycle is incomplete. INVALID
-                                    if (ratio < 1)
-                                    {
-                                        vacProof.IsInvalid = true;
-                                        return vacProof;
-                                    }
-
-                                    // if ratio is over 1, then the vaccination cycle is completed and a booster dose was made. VALID
-                                    else if (ratio > 1)
-                                    {
-                                        return vacProof;
-                                    }
-
-                                    //if ratio is = 1, then we have to consider different cases
-                                    else if (ratio == 1)
-                                    {
-                                        // we need additional data: the medicinal product (mp), since the Johnson&Johnson vaccine cycle is mono-dose (so ratio could be = 1)
-                                        if (v.MedicinalProduct == "EU/1/20/1525") // J&J vaccine
-                                        {
-                                            if (v.DoseNumber == 1 && v.SeriesOfDoses == 1)
-                                            {
-                                                // cycle completed, but no booster dose made. TEST NEEDED
-                                                vacProof.TestNeeded = true;
-                                                return vacProof;
-                                            }
-                                            else if (v.DoseNumber == 2 && v.SeriesOfDoses == 2)
-                                            {
-                                                // cycle completed, and booster dose made. VALID
-                                                return vacProof;
-                                            }
-                                        }
-                                        else //for every other medicinal product
-                                        {
-                                            if (v.DoseNumber == 1)
-                                            {
-                                                // vaccination cycle incomplete. INVALID
-                                                vacProof.IsInvalid = true;
-                                                return vacProof;
-                                            }
-
-                                            else if (v.DoseNumber == 2)
-                                            {
-                                                // vaccination cycle completed, no booster dose. TEST NEEDED
-                                                vacProof.TestNeeded = true;
-                                                return vacProof;
-                                            }
-
-                                            else if (v.DoseNumber == 3)
-                                            {
-                                                // vaccination cycle completed + booster dose. VALID
-                                                return vacProof;
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                        
+                        return Apply2GValidation(vacProof);
                     }
 
+                    // Booster validation: only DGCs certifying a completed vaccination cycle + a booster dose are valid
+                    else if (validationMode == ValidationType.Booster)
+                    {
+
+                        return ApplyBoosterValidation(vacProof);
+
+                    }
                 }
             }
             catch (Exception e)
@@ -197,6 +124,97 @@ namespace GreenPass
             }
             return null;
         }
+
+        private SignedDGC ApplyBoosterValidation(SignedDGC vacProof)
+        {
+            /*
+             * !!!IMPORTANT WARNING!!!
+             * The code contained into the "if" from line 154 is not tested because there weren't enough test assets. Proceed at your own risk!
+             * If you have testing assets, please do use them to test this code using the ValidationTests class
+             */
+
+            // if DGC === test, then INVALID
+            if (vacProof.Dgc.Tests != null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations == null)
+            {
+                vacProof.IsInvalid = true;
+                return vacProof;
+            }
+
+            // if DGC == vaccination, there are additional parameters to check
+            if (vacProof.Dgc.Vaccinations != null)
+            {
+                foreach (var v in vacProof.Dgc.Vaccinations)
+                {
+                    // we need to check the number of the administered dose (dn) to the required doses (sd) ratio
+                    // if the ratio is positive (dn >= sd), the DGC could be VALID or TEST_NEEDED
+
+                    if (v.DoseNumber >= v.SeriesOfDoses)
+                    {
+                        // we also need to check the medicinal product. If it is Johnson & Johnson, then the vaccination cycle is single dose
+                        if (v.MedicinalProduct == "EU/1/20/1525") // Janssen vaccine
+                        {
+                            if ((v.DoseNumber == v.SeriesOfDoses) && v.DoseNumber < 2) 
+                            {
+                                // Since J&J vaccination cycle is completed with a single dose, then the cycle is completed but no booster dose was administered. TEST_NEEDED
+                                vacProof.TestNeeded = true;
+                                return vacProof;
+                            }
+                        }
+                        else 
+                        {
+                            //if other medicinal products != J&J were used, then a vaccination cycle is completed with two administered doses
+
+                            if ((v.DoseNumber == v.SeriesOfDoses) && v.DoseNumber < 3)
+                            {
+                                // vaccination cycle completed, but no booster dose administered. TEST_NEEDED
+                                vacProof.TestNeeded = true;
+                                return vacProof;
+                            }
+                        }
+                        // otherwise, if ratio is over 1 (dn > sd), then the vaccination cycle is complete, and a booster dose was administered. VALID
+                        return vacProof;
+                    }
+                    else
+                    {
+                        // dn < sd. Vaccination cycle not completed. INVALID
+                        vacProof.IsInvalid = true;
+                        return vacProof;
+                    }
+                }
+            }
+
+            // if DGC == recovery, then TEST_NEEDED
+            if (vacProof.Dgc.Recoveries != null)
+            {
+                vacProof.TestNeeded = true;
+                return vacProof;
+            }
+
+            //if we reach this code, there was an error.
+            _logger.LogCritical($"ValidationService.ApplyBoosterValidation: unreachable code block reached. Setting DGC as invalid.");
+            vacProof.IsInvalid = true;
+            return vacProof;
+        }
+
+        private SignedDGC Apply2GValidation(SignedDGC vacProof)
+        {
+            // if dgc is invalid, return without checking other validation types
+            if (vacProof.IsInvalid)
+            {
+                return vacProof;
+            }
+
+            // if DGC == test, then INVALID
+            if (vacProof.Dgc.Tests != null && vacProof.Dgc.Recoveries == null && vacProof.Dgc.Vaccinations == null)
+            {
+                vacProof.IsInvalid = true;
+                return vacProof;
+            }
+
+            // else (recovery or vaccination), test stays valid
+            return vacProof;
+        }
+
         async Task ApplyRules(SignedDGC vacProof)
         {
             await ApplyExpirationDate(vacProof);
