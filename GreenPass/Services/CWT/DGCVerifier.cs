@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DGCValidator.Services.CWT.Certificates;
+using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.X509;
 
@@ -17,10 +18,12 @@ namespace DGCValidator.Services.CWT
     public class DGCVerifier
     {
         private readonly ICertificateProvider certificateProvider;
+        private readonly ILogger _logger;
 
-        public DGCVerifier(ICertificateProvider certificateProvider)
+        public DGCVerifier(ICertificateProvider certificateProvider, ILogger logger)
         {
             this.certificateProvider = certificateProvider;
+            _logger = logger;
         }
 
         /**
@@ -50,17 +53,18 @@ namespace DGCValidator.Services.CWT
 
             foreach (AsymmetricKeyParameter cert in certs)
             {
-                Console.WriteLine("Attempting HCERT signature verification using certificate");// '{0}'", cert.Subject);//getSubjectX500Principal().getName()) ;
+                _logger?.LogInformation($"Attempting HCERT signature verification using certificate {cert}");
 
-                try {
+                try
+                {
                     byte[] key = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(cert).GetEncoded();
                     obj.VerifySignature(key);
                     string keyString = System.Text.Encoding.UTF8.GetString(key);
-                    Console.WriteLine("HCERT signature verification succeeded using certificate");// '{0}'", cert.Subject); //getSubjectX500Principal().getName());
+                    _logger?.LogInformation($"HCERT signature verification succeeded using certificate {cert}");
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(String.Format("HCERT signature verification failed using certificate '{0}' - {1}",cert, e.Message));
+                    _logger?.LogWarning(e,$"HCERT signature verification failed using certificate {cert}");
                     continue;
                 }
 
@@ -73,15 +77,15 @@ namespace DGCValidator.Services.CWT
                     vacProof.CertificateExpirationDate = expiration.Value;
                     if (DateTime.UtcNow.CompareTo(expiration) >= 0)
                     {
-                        throw new CertificateExpiredException(string.Format("DCC has expired {0}",expiration.Value));
+                        throw new CertificateExpiredException(string.Format("DCC has expired {0}", expiration.Value));
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Signed HCERT did not contain an expiration time - assuming it is valid");
+                    _logger?.LogWarning("Signed HCERT did not contain an expiration time - assuming it is valid");
                 }
                 DateTime? issuedAt = cwt.GetIssuedAt();
-                if(issuedAt.HasValue)
+                if (issuedAt.HasValue)
                 {
                     vacProof.IssuedDate = issuedAt.Value;
                 }
@@ -89,7 +93,7 @@ namespace DGCValidator.Services.CWT
                 return cwt.GetDgcV1();
             }
 
-            if (certs.Count<=0)
+            if (certs.Count <= 0)
             {
                 throw new CertificateUnknownException("No signer certificates could be found");
             }

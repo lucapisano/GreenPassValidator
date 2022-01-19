@@ -26,14 +26,6 @@ namespace TestProject1
             _certManager = _sp.GetRequiredService<CertificateManager>();
         }
 
-        [TestMethod]
-        public async Task Test()
-        {
-            //insert a valid green pass data here, it can be obtained scanning the QR Code
-            var scanResult = "HC1:";
-            var res = await _sp.GetRequiredService<ValidationService>().Validate(scanResult);
-            Assert.IsFalse(res.IsInvalid);
-        }
 
         [TestMethod]
         public async Task TestInvalid_ADOLF_HITLER()

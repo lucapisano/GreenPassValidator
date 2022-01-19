@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using GreenPass.Options;
 using GreenPass;
 using GreenPass.Services;
+using Microsoft.Extensions.Logging;
 
 namespace DGCValidator.Services.Tests
 {

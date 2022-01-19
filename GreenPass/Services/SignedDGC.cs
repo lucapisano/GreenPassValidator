@@ -18,6 +18,7 @@ namespace DGCValidator.Services
         public DateTime CertificateExpirationDate { get; set; }
         public DateTime IssuedDate { get; set; }
         public bool IsInvalid { get; set; }
+        public bool TestNeeded { get; set; }
         public SignedDGC()
         {
         }
