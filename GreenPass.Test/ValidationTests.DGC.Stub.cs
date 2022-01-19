@@ -16,7 +16,7 @@ namespace GreenPass.Test
      *                                                          
      *                                                        
      * 
-     *      This is a stub. Copy and paste here your DGCs to test them.
+     *      This is a stub. Please copy this file to ValidationTests.DGC.cs and fill in your own DGCs for testing
      * 
      */
     partial class ValidationTests
